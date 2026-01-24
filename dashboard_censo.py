@@ -32,9 +32,24 @@ df = df.drop(
 
 df["Data"] = pd.to_datetime(df["Data"], dayfirst=True)
 
+# Criar coluna Dia da Semana (abreviado em PT-BR)
+dias_semana = {
+    0: "Seg",
+    1: "Ter",
+    2: "Qua",
+    3: "Qui",
+    4: "Sex",
+    5: "Sáb",
+    6: "Dom"
+}
+df["Dia"] = df["Data"].dt.weekday.map(dias_semana)
+
+# Criar coluna Data formatada (DD/MM/AAAA)
+df["Data_fmt"] = df["Data"].dt.strftime("%d/%m/%Y")
+
 #TRATAR A COLUNA %META
 
-df["% Meta"] = df["% Meta"].str.replace("%", "").astype(float)
+df["% Meta"] = df["% Meta"].str.replace("%", "", regex=False).astype(float)
 
 #INÍCIO DOS KPIS
 
@@ -256,11 +271,24 @@ st.divider()
 hoje = pd.Timestamp.today().normalize()
 data_inicio_tabela = hoje - pd.Timedelta(days=10)
 df_tabela = df[
-       (df["Data"] >= data_inicio_tabela) &
-       (df["Data"] <= hoje)
-    ]
+    (df["Data"] >= data_inicio_tabela) &
+    (df["Data"] <= hoje)
+].copy()
+
+df_tabela = df_tabela[
+    ["Dia", "Data_fmt", "Gabriel", "Leandro", "Rony", "Willa", "Total", "% Meta"]
+]
+
+# Formatar % Meta com símbolo %
+df_tabela["% Meta"] = df_tabela["% Meta"].round(0).astype(int).astype(str) + "%"
+
 with st.expander("📋Ver produção diária (Últimos 10 dias)"):
-   st.dataframe(df_tabela)
+    st.dataframe(
+        df_tabela,
+        use_container_width=True,
+        hide_index=True,
+        height=420
+    )
     
 
 #PARA ALTERAÇÕS DO CÓDGIO:
