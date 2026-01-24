@@ -249,8 +249,22 @@ card_agente_html(col_lea, "Leandro", total_leandro, status_leandro)
 card_agente_html(col_ron, "Rony", total_rony, status_rony)
 card_agente_html(col_wil, "Willa", total_willa, status_willa)
 
-st.divider()
+
 
 #Criar separação visual
-with st.expander("📋Ver dados detalhados (Tabela)"):
-    st.dataframe(df)
+st.divider()
+hoje = pd.Timestamp.today().normalize()
+data_inicio_tabela = hoje - pd.Timedelta(days=10)
+df_tabela = df[
+       (df["Data"] >= data_inicio_tabela) &
+       (df["Data"] <= hoje)
+    ]
+with st.expander("📋Ver produção diária (Últimos 10 dias)"):
+   st.dataframe(df_tabela)
+    
+
+#PARA ALTERAÇÕS DO CÓDGIO:
+#git add .
+#git commit -m "Ajuste visual / novo KPI"
+#git push
+#https://dashboard-censo-equipe-m6rxxuesb5bvcaxqyd3eat.streamlit.app/
