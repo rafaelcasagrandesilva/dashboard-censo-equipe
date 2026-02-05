@@ -134,7 +134,7 @@ st.markdown("""
     
     .status-success { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
     .status-warning { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
-    .status-danger { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); }
+    .status-danger { background: linear-gradient(135deg, #F05252 0%, #DC2626 100%); }
 
     .agent-name { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
     .agent-value { font-size: 1.5rem; font-weight: 700; }
@@ -151,18 +151,23 @@ st.markdown("""
 @st.cache_data(ttl=600)
 def load_data():
     SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSfLPS2shPGfYe72_qhFGeTeFuMcJuurpKh1mIe73knOlO-GbSlsCdFv64Og0utVkcZ3WW8IaHKfIG/pub?output=csv"
-    df = pd.read_csv(SHEET_URL)
+    
+    df_raw = pd.read_csv(SHEET_URL)  # planilha completa
+    
+    df = df_raw.copy()
     cols_to_drop = ["Unnamed: 0", "Meta", "Meta.1", "Meta.2", "Meta.3", "Meta.4", "250", "Unnamed: 15", "Unnamed: 13", "1000"]
     df = df.drop(columns=cols_to_drop, errors="ignore")
+    
     df["Data"] = pd.to_datetime(df["Data"], dayfirst=True)
     df["% Meta"] = df["% Meta"].astype(str).str.replace("%", "", regex=False).astype(float)
     dias_semana = {0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"}
     df["Dia"] = df["Data"].dt.weekday.map(dias_semana)
     df["Data_fmt"] = df["Data"].dt.strftime("%d/%m/%Y")
-    return df
+    
+    return df, df_raw
 
 try:
-    df = load_data()
+    df, df_raw = load_data()
     
     # Cálculos
     df_produtivo = df[df["Total"] > 0]
@@ -266,27 +271,33 @@ try:
     cols_agentes = st.columns(len(agentes) + 1)
     
     with cols_agentes[0]:
-        st.markdown(f'<div class="agent-card status-warning"><div class="agent-name">Meta Alvo</div><div class="agent-value">{meta_individual_acumulada:,.0f}</div><div class="agent-status">Acumulado</div></div>'.replace(',', '.'), unsafe_allow_html=True)
+        meta_alvo = df_raw.iloc[36, 15]  # P38
+        st.markdown(
+            f'<div class="agent-card status-warning">'
+            f'<div class="agent-name">Meta Alvo</div>'
+            f'<div class="agent-value">{meta_alvo:,.0f}</div>'
+            f'<div class="agent-status">Acumulado</div>'
+            f'</div>'.replace(',', '.'),
+            unsafe_allow_html=True
+        )
 
     celulas_resumo = {
-        "Gabriel": (33, 15),  # P34
-        "Leandro": (34, 15),  # P35
-        "Rony": (35, 15),     # P36
-        "Willa": (36, 15)     # P37
+        "Gabriel": (32, 15),  # P34
+        "Leandro": (33, 15),  # P35
+        "Rony": (34, 15),     # P36
+        "Willa": (35, 15)     # P37
     }
 
     for i, agente in enumerate(agentes):
 
         if agente in celulas_resumo:
             linha, coluna = celulas_resumo[agente]
-            total_agente = df.iloc[linha, coluna]
+            total_agente = df_raw.iloc[linha, coluna]
         else:
             total_agente = df[agente].sum()
 
-        if total_agente >= meta_individual_acumulada:
-            status_class, status_text = "status-success", "Meta Atingida"
-        elif total_agente >= (meta_individual_acumulada * 0.8):
-            status_class, status_text = "status-warning", "Em Atenção"
+        if total_agente >= meta_alvo:
+            status_class, status_text = "status-success", "Dentro da Meta"
         else:
             status_class, status_text = "status-danger", "Abaixo da Meta"
             
