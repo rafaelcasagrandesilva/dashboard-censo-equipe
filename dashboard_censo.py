@@ -148,7 +148,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 3. CARREGAMENTO E TRATAMENTO DE DADOS
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=60)
 def load_data():
     SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSfLPS2shPGfYe72_qhFGeTeFuMcJuurpKh1mIe73knOlO-GbSlsCdFv64Og0utVkcZ3WW8IaHKfIG/pub?output=csv"
     
