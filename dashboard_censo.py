@@ -1,4 +1,4 @@
-]import streamlit as st
+import streamlit as st
 import pandas as pd
 import datetime
 import base64
@@ -269,36 +269,20 @@ try:
         st.markdown(f'<div class="agent-card status-warning"><div class="agent-name">Meta Alvo</div><div class="agent-value">{meta_individual_acumulada:,.0f}</div><div class="agent-status">Acumulado</div></div>'.replace(',', '.'), unsafe_allow_html=True)
 
     celulas_resumo = {
-    "Gabriel": (33, 15),  # P34
-    "Leandro": (34, 15),  # P35
-    "Rony": (35, 15),     # P36
-    "Willa": (36, 15)     # P37
-}
+        "Gabriel": (33, 15),  # P34
+        "Leandro": (34, 15),  # P35
+        "Rony": (35, 15),     # P36
+        "Willa": (36, 15)     # P37
+    }
 
-for i, agente in enumerate(agentes):
+    for i, agente in enumerate(agentes):
 
-    if agente in celulas_resumo:
-        linha, coluna = celulas_resumo[agente]
-        total_agente = df.iloc[linha, coluna]
-    else:
-        total_agente = df[agente].sum()
+        if agente in celulas_resumo:
+            linha, coluna = celulas_resumo[agente]
+            total_agente = df.iloc[linha, coluna]
+        else:
+            total_agente = df[agente].sum()
 
-    if total_agente >= meta_individual_acumulada:
-        status_class, status_text = "status-success", "Meta Atingida"
-    elif total_agente >= (meta_individual_acumulada * 0.8):
-        status_class, status_text = "status-warning", "Em Atenção"
-    else:
-        status_class, status_text = "status-danger", "Abaixo da Meta"
-        
-    with cols_agentes[i+1]:
-        st.markdown(
-            f'<div class="agent-card {status_class}">'
-            f'<div class="agent-name">{agente}</div>'
-            f'<div class="agent-value">{total_agente:,.0f}</div>'
-            f'<div class="agent-status">{status_text}</div>'
-            f'</div>'.replace(',', '.'),
-            unsafe_allow_html=True
-        )
         if total_agente >= meta_individual_acumulada:
             status_class, status_text = "status-success", "Meta Atingida"
         elif total_agente >= (meta_individual_acumulada * 0.8):
@@ -307,7 +291,14 @@ for i, agente in enumerate(agentes):
             status_class, status_text = "status-danger", "Abaixo da Meta"
             
         with cols_agentes[i+1]:
-            st.markdown(f'<div class="agent-card {status_class}"><div class="agent-name">{agente}</div><div class="agent-value">{total_agente:,.0f}</div><div class="agent-status">{status_text}</div></div>'.replace(',', '.'), unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="agent-card {status_class}">'
+                f'<div class="agent-name">{agente}</div>'
+                f'<div class="agent-value">{total_agente:,.0f}</div>'
+                f'<div class="agent-status">{status_text}</div>'
+                f'</div>'.replace(',', '.'),
+                unsafe_allow_html=True
+            )
 
     # TABELA DETALHADA
     st.markdown("<br>", unsafe_allow_html=True)
